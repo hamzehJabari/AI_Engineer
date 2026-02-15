@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliWheels — Final Pitch Presentation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0f0f1a;color:#e0e0e0;overflow:hidden;height:100vh}
+        .slide{display:none;height:100vh;padding:50px 70px;flex-direction:column;justify-content:center;position:relative}
+        .slide.active{display:flex}
+
+        /* Navigation */
+        .nav-bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a2eee;padding:12px 40px;display:flex;justify-content:space-between;align-items:center;z-index:100;border-top:2px solid #7b2ff733;backdrop-filter:blur(10px)}
+        .nav-bar button{padding:9px 26px;border:2px solid #7b2ff7;border-radius:50px;background:transparent;color:#fff;font-weight:700;cursor:pointer;transition:all .3s;font-size:.9em}
+        .nav-bar button:hover{background:#7b2ff7;box-shadow:0 4px 20px #7b2ff744}
+        .nav-bar .counter{color:#888;font-size:.85em;letter-spacing:.5px}
+
+        /* Progress bar */
+        .progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#00d4ff,#7b2ff7);transition:width .4s ease;z-index:100}
+
+        /* Typography */
+        h1{font-size:3.4em;font-weight:900;margin-bottom:16px;line-height:1.1}
+        h2{font-size:2.2em;font-weight:800;margin-bottom:20px}
+        h3{font-size:1.35em;font-weight:700;margin-bottom:10px}
+        p{font-size:1.1em;line-height:1.7;color:#bbb}
+        .accent{background:linear-gradient(90deg,#00d4ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .accent2{background:linear-gradient(90deg,#ff6b6b,#ffa500);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .accent3{background:linear-gradient(90deg,#25d366,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .accent4{background:linear-gradient(90deg,#ffa500,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .subtitle{font-size:1.2em;color:#888;margin-bottom:24px}
+
+        /* Layout helpers */
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:24px}
+        .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:24px}
+        .grid-4{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
+        .card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid #ffffff0d;border-radius:16px;padding:24px;transition:transform .3s,border-color .3s}
+        .card:hover{transform:translateY(-2px);border-color:#7b2ff744}
+        .card .icon{font-size:2em;margin-bottom:10px}
+        .card h3{color:#fff;margin-bottom:6px;font-size:1.1em}
+        .card p{font-size:.9em;color:#888;line-height:1.5}
+
+        /* Tags */
+        .tag{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.8em;font-weight:700;margin:3px}
+        .tag-purple{background:#7b2ff722;color:#7b2ff7;border:1px solid #7b2ff744}
+        .tag-cyan{background:#00d4ff22;color:#00d4ff;border:1px solid #00d4ff44}
+        .tag-green{background:#25d36622;color:#25d366;border:1px solid #25d36644}
+        .tag-orange{background:#ffa50022;color:#ffa500;border:1px solid #ffa50044}
+        .tag-red{background:#ff6b6b22;color:#ff6b6b;border:1px solid #ff6b6b44}
+
+        /* Table */
+        table{width:100%;border-collapse:collapse;margin-top:16px}
+        th{text-align:left;padding:10px 14px;background:#7b2ff718;color:#00d4ff;font-size:.85em;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+        td{padding:10px 14px;border-bottom:1px solid #ffffff06;font-size:.92em}
+        tr:hover td{background:#ffffff04}
+
+        /* Architecture diagram */
+        .arch-box{background:#16213e;border:2px solid #7b2ff733;border-radius:12px;padding:14px 20px;text-align:center;font-weight:600;font-size:.95em}
+        .arch-arrow{text-align:center;color:#00d4ff;font-size:1.6em;padding:5px 0}
+
+        /* Code block */
+        .code-block{background:#0d0d18;border:1px solid #ffffff0d;border-radius:10px;padding:16px 20px;font-family:'Cascadia Code','Consolas',monospace;font-size:.85em;color:#00d4ff;line-height:1.6;margin-top:14px;overflow-x:auto}
+
+        /* Slide backgrounds */
+        .bg-purple{background:radial-gradient(ellipse at 50% 30%,#7b2ff712 0%,transparent 70%)}
+        .bg-red{background:radial-gradient(ellipse at 80% 20%,#ff6b6b0c 0%,transparent 60%)}
+        .bg-blue{background:radial-gradient(ellipse at 20% 80%,#00d4ff0c 0%,transparent 60%)}
+        .bg-green{background:radial-gradient(ellipse at 50% 50%,#25d3660a 0%,transparent 60%)}
+        .bg-orange{background:radial-gradient(ellipse at 70% 30%,#ffa5000a 0%,transparent 60%)}
+        .bg-center{background:radial-gradient(ellipse at 50% 50%,#7b2ff710 0%,transparent 60%)}
+
+        /* Bullet list */
+        ul{list-style:none;margin-top:14px}
+        ul li{padding:8px 0;font-size:1em;color:#bbb;border-bottom:1px solid #ffffff05}
+        ul li::before{content:"\25B8 ";color:#7b2ff7;font-weight:700}
+        .center{text-align:center}
+
+        /* Stat box */
+        .stat{text-align:center;padding:16px}
+        .stat-num{font-size:2.4em;font-weight:900;line-height:1}
+        .stat-label{font-size:.85em;color:#888;margin-top:6px}
+
+        /* Checklist */
+        .check-item{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:.95em}
+        .check-icon{color:#25d366;font-size:1.1em;flex-shrink:0}
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ==================== SLIDE 1: Title ==================== -->
+<div class="slide bg-purple active" data-slide="1">
+    <div class="center">
+        <p style="font-size:4.5em;margin-bottom:16px">&#128663;</p>
+        <h1><span class="accent">IntelliWheels</span></h1>
+        <p class="subtitle" style="font-size:1.4em;margin-top:8px">AI-Powered Car Marketplace Assistant for Jordan</p>
+        <div style="margin-top:28px">
+            <span class="tag tag-purple">Google Gemini 2.5</span>
+            <span class="tag tag-cyan">Django REST</span>
+            <span class="tag tag-green">Twilio WhatsApp</span>
+            <span class="tag tag-orange">Crisp Logic</span>
+            <span class="tag tag-red">Computer Vision</span>
+        </div>
+        <p style="margin-top:50px;color:#555;font-size:.85em">AI Engineer Course &mdash; Capstone Project &mdash; February 2026</p>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 2: Problem ==================== -->
+<div class="slide bg-red" data-slide="2">
+    <h2><span class="accent2">The Problem</span></h2>
+    <p class="subtitle">Car buyers in Jordan face multiple challenges</p>
+    <div class="grid-2">
+        <div>
+            <div class="card" style="border-color:#ff6b6b22;margin-bottom:16px">
+                <div class="icon">&#128176;</div>
+                <h3>Price Opacity</h3>
+                <p>No standardized reference for used car valuations in JOD. Sellers set arbitrary prices &mdash; buyers have no way to verify fair market value.</p>
+            </div>
+            <div class="card" style="border-color:#ffa50022;margin-bottom:16px">
+                <div class="icon">&#128269;</div>
+                <h3>Information Fragmentation</h3>
+                <p>Specs, comparisons, and advice are scattered across forums, Facebook groups, and word of mouth. No single expert source.</p>
+            </div>
+        </div>
+        <div>
+            <div class="card" style="border-color:#7b2ff722;margin-bottom:16px">
+                <div class="icon">&#128247;</div>
+                <h3>No Visual Identification</h3>
+                <p>Buyers see a car on the street and can't quickly identify what it is, what year it is, or what it's worth.</p>
+            </div>
+            <div class="card" style="border-color:#00d4ff22;margin-bottom:16px">
+                <div class="icon">&#128241;</div>
+                <h3>Accessibility Gap</h3>
+                <p>Technical car data isn't easily accessible to non-technical users, especially on mobile devices.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 3: Solution ==================== -->
+<div class="slide bg-blue" data-slide="3">
+    <h2><span class="accent">The Solution: IntelliWheels</span></h2>
+    <p class="subtitle">4 AI-powered features in one platform</p>
+    <div class="grid-4">
+        <div class="card">
+            <div class="icon">&#129302;</div>
+            <h3>AI Chatbot</h3>
+            <p><strong>Google Gemini 2.5 Flash</strong> &mdash; Ask anything about cars: specs, comparisons, recommendations, maintenance. Jordanian market focus with JOD pricing.</p>
+        </div>
+        <div class="card">
+            <div class="icon">&#128202;</div>
+            <h3>Price Estimator</h3>
+            <p><strong>Crisp (rule-based) logic</strong> &mdash; 15 makes, 70+ models. Three depreciation tiers: Luxury (12%), Premium (10%), Economic (7%). Mileage penalties.</p>
+        </div>
+        <div class="card">
+            <div class="icon">&#128065;</div>
+            <h3>Vision Helper</h3>
+            <p><strong>Gemini Vision API</strong> &mdash; Upload any car photo and instantly identify make, model, year, and visible condition.</p>
+        </div>
+        <div class="card">
+            <div class="icon">&#128242;</div>
+            <h3>WhatsApp Share</h3>
+            <p><strong>Twilio API</strong> &mdash; Send chat replies and price estimates directly to WhatsApp for on-the-go access.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 4: Tech Stack ==================== -->
+<div class="slide bg-center" data-slide="4">
+    <h2><span class="accent">Technology Stack</span></h2>
+    <div class="grid-2">
+        <div>
+            <table>
+                <tr><th>Layer</th><th>Technology</th></tr>
+                <tr><td>Language</td><td>Python 3.12</td></tr>
+                <tr><td>Backend</td><td>Django 4.2 + REST Framework</td></tr>
+                <tr><td>LLM</td><td>Google Gemini 2.5 Flash</td></tr>
+                <tr><td>LLM SDK</td><td>google-genai (new official SDK)</td></tr>
+                <tr><td>Vision</td><td>Gemini Vision API</td></tr>
+                <tr><td>Price Logic</td><td>Crisp / rule-based (custom)</td></tr>
+                <tr><td>Messaging</td><td>Twilio WhatsApp Sandbox</td></tr>
+                <tr><td>Database</td><td>SQLite 3</td></tr>
+                <tr><td>Frontend</td><td>HTML / CSS / JavaScript</td></tr>
+                <tr><td>Config</td><td>python-dotenv (.env)</td></tr>
+            </table>
+        </div>
+        <div>
+            <h3 style="margin-top:8px">Why These Choices?</h3>
+            <ul>
+                <li><strong>Django + DRF</strong> &mdash; Battle-tested framework with admin, ORM, serializer validation</li>
+                <li><strong>Gemini 2.5 Flash</strong> &mdash; Fast, multimodal, free tier suitable for dev</li>
+                <li><strong>google-genai SDK</strong> &mdash; New official SDK (old one is deprecated)</li>
+                <li><strong>Crisp logic</strong> &mdash; Deterministic pricing; no hallucinated numbers</li>
+                <li><strong>Twilio sandbox</strong> &mdash; Industry-standard WhatsApp API for prototyping</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 5: Architecture ==================== -->
+<div class="slide bg-purple" data-slide="5">
+    <h2><span class="accent">System Architecture</span></h2>
+    <div class="grid-2">
+        <div>
+            <div class="arch-box" style="border-color:#00d4ff44">&#127760; Browser &mdash; Dark Cyberpunk UI (Single Page)</div>
+            <div class="arch-arrow">&#11015;</div>
+            <div class="arch-box" style="border-color:#7b2ff755">&#128640; Django REST Framework &mdash; 7 API Endpoints</div>
+            <div class="arch-arrow">&#11015;</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+                <div class="arch-box" style="font-size:.78em;border-color:#7b2ff744;padding:10px">&#129302;<br>Car<br>Chatbot</div>
+                <div class="arch-box" style="font-size:.78em;border-color:#ffa50044;padding:10px">&#128202;<br>Crisp<br>Logic</div>
+                <div class="arch-box" style="font-size:.78em;border-color:#00d4ff44;padding:10px">&#128065;<br>Gemini<br>Vision</div>
+                <div class="arch-box" style="font-size:.78em;border-color:#25d36644;padding:10px">&#128242;<br>Twilio<br>WhatsApp</div>
+            </div>
+            <div class="arch-arrow">&#11015;</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div class="arch-box" style="font-size:.85em;border-color:#ffffff18">&#128451; SQLite &mdash; All records persisted</div>
+                <div class="arch-box" style="font-size:.85em;border-color:#7b2ff744">&#129504; Gemini API (google-genai)</div>
+            </div>
+        </div>
+        <div>
+            <h3>Data Flows</h3>
+            <div class="card" style="padding:16px;margin-bottom:10px">
+                <h3 style="color:#7b2ff7;font-size:.9em">Chat Flow</h3>
+                <p style="font-size:.82em">User &#8594; ChatView &#8594; CarChatbotAgent &#8594; GeminiClient &#8594; Gemini API &#8594; ChatMessage saved &#8594; JSON response</p>
+            </div>
+            <div class="card" style="padding:16px;margin-bottom:10px">
+                <h3 style="color:#ffa500;font-size:.9em">Price Flow</h3>
+                <p style="font-size:.82em">User &#8594; PriceEstimateView &#8594; estimate_price() crisp logic &#8594; PriceEstimate saved &#8594; JSON response</p>
+            </div>
+            <div class="card" style="padding:16px;margin-bottom:10px">
+                <h3 style="color:#00d4ff;font-size:.9em">Vision Flow</h3>
+                <p style="font-size:.82em">Image upload &#8594; VisionView &#8594; analyze_car_image() &#8594; Gemini Vision &#8594; VisionAnalysis saved &#8594; JSON</p>
+            </div>
+            <div class="card" style="padding:16px">
+                <h3 style="color:#25d366;font-size:.9em">WhatsApp Flow</h3>
+                <p style="font-size:.82em">Click share &#8594; WhatsAppView &#8594; send_whatsapp_message() &#8594; Twilio REST API &#8594; Delivered</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 6: API Design ==================== -->
+<div class="slide bg-blue" data-slide="6">
+    <h2><span class="accent">API Design &mdash; 7 Endpoints</span></h2>
+    <table>
+        <tr><th>Endpoint</th><th>Method</th><th>Description</th><th>Input</th></tr>
+        <tr><td style="color:#00d4ff">/api/chat/</td><td>POST</td><td>AI chatbot conversation</td><td>message, session_id (opt)</td></tr>
+        <tr><td style="color:#ffa500">/api/estimate/</td><td>POST</td><td>Crisp logic price estimate</td><td>make, model, year, mileage_km</td></tr>
+        <tr><td style="color:#ffa500">/api/makes/</td><td>GET</td><td>List all 15 car makes</td><td>&mdash;</td></tr>
+        <tr><td style="color:#ffa500">/api/models/&lt;make&gt;/</td><td>GET</td><td>List models for a make</td><td>make (URL param)</td></tr>
+        <tr><td style="color:#00d4ff">/api/vision/</td><td>POST</td><td>Car image AI analysis</td><td>image (file upload)</td></tr>
+        <tr><td style="color:#25d366">/api/whatsapp/send/</td><td>POST</td><td>Send via WhatsApp (Twilio)</td><td>message, to (opt)</td></tr>
+        <tr><td style="color:#888">/health/</td><td>GET</td><td>Health check</td><td>&mdash;</td></tr>
+    </table>
+    <div class="grid-2" style="margin-top:18px">
+        <div class="code-block" style="font-size:.8em">
+            <span style="color:#888">// POST /api/estimate/</span><br>
+            { "make": "toyota", "model": "camry",<br>
+            &nbsp;&nbsp;"year": 2020, "mileage_km": 80000 }<br><br>
+            <span style="color:#25d366">&#8594; { "category": "economic",</span><br>
+            <span style="color:#25d366">&nbsp;&nbsp;&nbsp;&nbsp;"original_price_jod": 25000,</span><br>
+            <span style="color:#25d366">&nbsp;&nbsp;&nbsp;&nbsp;"depreciated_price_jod": 16213,</span><br>
+            <span style="color:#25d366">&nbsp;&nbsp;&nbsp;&nbsp;"depreciation_pct": 35.1 }</span>
+        </div>
+        <div class="code-block" style="font-size:.8em">
+            <span style="color:#888">// POST /api/chat/</span><br>
+            { "message": "Best car under 15K JOD?" }<br><br>
+            <span style="color:#25d366">&#8594; { "message": "For 15,000 JOD...",</span><br>
+            <span style="color:#25d366">&nbsp;&nbsp;&nbsp;&nbsp;"session_id": 1,</span><br>
+            <span style="color:#25d366">&nbsp;&nbsp;&nbsp;&nbsp;"model_used": "gemini-2.5-flash",</span><br>
+            <span style="color:#25d366">&nbsp;&nbsp;&nbsp;&nbsp;"response_time_ms": 1234 }</span>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 7: Price Estimator Deep Dive ==================== -->
+<div class="slide bg-orange" data-slide="7">
+    <h2><span class="accent4">Crisp Price Estimator</span></h2>
+    <p class="subtitle">Deterministic, rule-based &mdash; no hallucinated prices</p>
+    <div class="grid-2">
+        <div>
+            <h3>Depreciation Formula</h3>
+            <div class="code-block" style="font-size:1em;text-align:center;padding:20px;color:#fff">
+                Value = Base &times; (1 &minus; rate)<sup style="font-size:.8em">age</sup> &minus; Mileage Penalty
+            </div>
+            <table style="margin-top:16px">
+                <tr><th>Category</th><th>Rate/yr</th><th>Examples</th></tr>
+                <tr><td><span class="tag tag-red" style="margin:0;font-size:.75em">Luxury</span></td><td>12%</td><td>S-Class, 7-Series, Cayenne</td></tr>
+                <tr><td><span class="tag tag-orange" style="margin:0;font-size:.75em">Premium</span></td><td>10%</td><td>C-Class, 3-Series, A4</td></tr>
+                <tr><td><span class="tag tag-cyan" style="margin:0;font-size:.75em">Economic</span></td><td>7%</td><td>Camry, Elantra, Civic</td></tr>
+            </table>
+            <h3 style="margin-top:16px">Mileage Penalties</h3>
+            <ul>
+                <li>&gt; 100,000 km &#8594; extra 5% deduction</li>
+                <li>&gt; 200,000 km &#8594; extra 10% deduction</li>
+                <li>Floor: never below 5% of base price</li>
+            </ul>
+        </div>
+        <div>
+            <h3>Database Coverage</h3>
+            <div class="grid-3" style="margin-top:10px;gap:10px">
+                <div class="stat"><div class="stat-num accent">15</div><div class="stat-label">Car Makes</div></div>
+                <div class="stat"><div class="stat-num accent2">70+</div><div class="stat-label">Models</div></div>
+                <div class="stat"><div class="stat-num accent3">3</div><div class="stat-label">Categories</div></div>
+            </div>
+            <h3 style="margin-top:16px">Example Calculation</h3>
+            <div class="card" style="padding:16px">
+                <p style="font-size:.85em;color:#fff"><strong>Toyota Camry 2020 &bull; 80,000 km</strong></p>
+                <p style="font-size:.82em;margin-top:8px">Category: Economic (7%/yr)<br>
+                Base: 25,000 JOD<br>
+                Age: 6 years &#8594; factor: 0.6485<br>
+                After age: 16,213 JOD<br>
+                Mileage: under 100K &#8594; no penalty<br>
+                <strong style="color:#25d366">Final: 16,213 JOD (35.1% depreciation)</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 8: LLM & Agent ==================== -->
+<div class="slide bg-purple" data-slide="8">
+    <h2><span class="accent">LLM Integration &amp; Agent</span></h2>
+    <div class="grid-2">
+        <div>
+            <h3>GeminiClient Architecture</h3>
+            <div class="card" style="padding:16px;margin-bottom:12px">
+                <p style="font-size:.85em"><strong style="color:#7b2ff7">SDK:</strong> google-genai (new official SDK)<br>
+                <strong style="color:#7b2ff7">Model:</strong> gemini-2.5-flash<br>
+                <strong style="color:#7b2ff7">Pattern:</strong> Singleton instance (one client, all requests)<br>
+                <strong style="color:#7b2ff7">Methods:</strong> chat() + analyze_image()</p>
+            </div>
+            <h3>Key Features</h3>
+            <ul>
+                <li><strong>System instructions</strong> &mdash; Jordanian market specialization via GenerateContentConfig</li>
+                <li><strong>Multi-turn</strong> &mdash; Full conversation history with Content/Part objects</li>
+                <li><strong>Vision</strong> &mdash; Part.from_bytes() for image analysis</li>
+                <li><strong>Mock mode</strong> &mdash; Works without API key (returns setup instructions)</li>
+                <li><strong>Rate limit handling</strong> &mdash; 429 errors &#8594; friendly message, no crashes</li>
+            </ul>
+        </div>
+        <div>
+            <h3>CarChatbotAgent</h3>
+            <div class="code-block" style="font-size:.78em">
+<span style="color:#888"># System Prompt (simplified)</span><br>
+You are IntelliWheels AI, a car<br>
+marketplace assistant for Jordan.<br><br>
+<span style="color:#888"># Capabilities</span><br>
+1. Car specs &amp; comparisons<br>
+2. Budget recommendations (JOD)<br>
+3. Category explanations<br>
+4. Price guidance &#8594; estimator<br>
+5. Maintenance &amp; import tips
+            </div>
+            <h3 style="margin-top:16px">Session Management</h3>
+            <div class="card" style="padding:14px">
+                <p style="font-size:.82em">
+                    &#9656; Each conversation &#8594; unique <strong>ChatSession</strong><br>
+                    &#9656; Every message saved as <strong>ChatMessage</strong><br>
+                    &#9656; Full history sent to Gemini for context<br>
+                    &#9656; Frontend tracks <strong>session_id</strong> for continuity
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 9: Vision & WhatsApp ==================== -->
+<div class="slide bg-green" data-slide="9">
+    <h2><span class="accent3">Vision Analysis &amp; WhatsApp</span></h2>
+    <div class="grid-2">
+        <div>
+            <h3>&#128065; Gemini Vision Helper</h3>
+            <div class="card" style="padding:16px;margin-bottom:14px">
+                <p style="font-size:.85em"><strong>Input:</strong> Car photo (JPEG/PNG/WebP)<br>
+                <strong>Output:</strong> Make, Model, Year, Condition<br>
+                <strong>Method:</strong> Part.from_bytes() &#8594; Gemini Vision<br>
+                <strong>Prompt:</strong> Structured JSON output format</p>
+            </div>
+            <h3>Response Parsing</h3>
+            <ul>
+                <li>Parse JSON from Gemini response</li>
+                <li>Strip markdown code fences if present</li>
+                <li>Fallback: raw text &#8594; condition field</li>
+                <li>All results saved to VisionAnalysis model</li>
+            </ul>
+        </div>
+        <div>
+            <h3>&#128242; Twilio WhatsApp Integration</h3>
+            <div class="card" style="padding:16px;margin-bottom:14px">
+                <p style="font-size:.85em"><strong>Provider:</strong> Twilio WhatsApp Sandbox<br>
+                <strong>Pattern:</strong> Follows agents_htu-main project<br>
+                <strong>Sender:</strong> +14155238886 (sandbox)<br>
+                <strong>Recipient:</strong> Configurable via .env</p>
+            </div>
+            <h3>Features</h3>
+            <ul>
+                <li>Auto-add whatsapp: prefix to numbers</li>
+                <li>Share chat responses with one click</li>
+                <li>Share price estimates with one click</li>
+                <li>Error 63007 handling (invalid sender)</li>
+                <li>Toast notifications for send status</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 10: Database Models ==================== -->
+<div class="slide bg-center" data-slide="10">
+    <h2><span class="accent">Database Schema &mdash; 5 Models</span></h2>
+    <div class="grid-3">
+        <div class="card">
+            <h3 style="color:#7b2ff7">&#128663; CarListing</h3>
+            <p style="font-size:.8em">make, model, year, mileage_km, fuel_type, transmission, category, color, original_price_jod, listing_price_jod, description, is_sold</p>
+        </div>
+        <div class="card">
+            <h3 style="color:#00d4ff">&#128172; ChatSession</h3>
+            <p style="font-size:.8em">started_at, ended_at, summary<br><br>&#8592; has many ChatMessages</p>
+        </div>
+        <div class="card">
+            <h3 style="color:#00d4ff">&#128172; ChatMessage</h3>
+            <p style="font-size:.8em">session (FK), role (user/assistant), content, created_at<br><br>Full conversation history</p>
+        </div>
+        <div class="card">
+            <h3 style="color:#ffa500">&#128202; PriceEstimate</h3>
+            <p style="font-size:.8em">make, model, year, mileage_km, category, original_price_jod, depreciated_price_jod, depreciation_pct, breakdown (JSON)</p>
+        </div>
+        <div class="card">
+            <h3 style="color:#25d366">&#128065; VisionAnalysis</h3>
+            <p style="font-size:.8em">image (file), detected_make, detected_model, detected_year, condition_summary, raw_response</p>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center">
+            <h3 style="color:#888">Admin Panel</h3>
+            <p style="font-size:.8em;text-align:center">All 5 models registered<br>with list_display, filters,<br>and search fields at /admin/</p>
+        </div>
+    </div>
+    <p style="margin-top:18px;text-align:center;color:#555;font-size:.85em">SQLite database &bull; Django ORM &bull; All records persisted and inspectable via /admin/</p>
+</div>
+
+<!-- ==================== SLIDE 11: Safety & Performance ==================== -->
+<div class="slide bg-red" data-slide="11">
+    <h2><span class="accent2">Safety &amp; Performance</span></h2>
+    <div class="grid-3">
+        <div class="card">
+            <div class="icon">&#128274;</div>
+            <h3>Input Validation</h3>
+            <p>DRF serializers validate all inputs. Image MIME whitelist. Year 1980&ndash;2026. Message max 5000 chars.</p>
+        </div>
+        <div class="card">
+            <div class="icon">&#9889;</div>
+            <h3>Rate Limit Handling</h3>
+            <p>Gemini 429/RESOURCE_EXHAUSTED caught &#8594; friendly "rate limited" message. No crashes.</p>
+        </div>
+        <div class="card">
+            <div class="icon">&#128203;</div>
+            <h3>Structured Logging</h3>
+            <p>3 loggers (core, api, ai_engine). app.log + errors.log. Verbose format with PID/thread.</p>
+        </div>
+        <div class="card">
+            <div class="icon">&#128737;</div>
+            <h3>CORS &amp; CSRF</h3>
+            <p>CORS restricted in production. CSRF middleware active. Auth password validators enabled.</p>
+        </div>
+        <div class="card">
+            <div class="icon">&#128260;</div>
+            <h3>Graceful Fallbacks</h3>
+            <p>Mock responses (no API key). Vision JSON parse fallback. Floor price (5% of base).</p>
+        </div>
+        <div class="card">
+            <div class="icon">&#128230;</div>
+            <h3>Data Persistence</h3>
+            <p>All chats, estimates, and vision results saved. Django Admin for full data inspection.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 12: Capstone Checklist ==================== -->
+<div class="slide bg-green" data-slide="12">
+    <h2><span class="accent3">Capstone Requirements &#10004;</span></h2>
+    <div class="grid-2">
+        <div>
+            <h3>Core Requirements</h3>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Use case design (car marketplace for Jordan)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Django project + API endpoints (7 endpoints)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Core LLM logic (Gemini via google-genai SDK)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Agent capabilities (CarChatbotAgent)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> WhatsApp connection (Twilio API)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Debugging &amp; error handling (logging + fallbacks)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Performance &amp; safety checks (validation + rate limits)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Technical documentation (TECHNICAL_DOCUMENTATION.md)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Final pitch presentation (this presentation)</div>
+        </div>
+        <div>
+            <h3>Bonus Features</h3>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Computer Vision (Gemini Vision API)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Crisp logic estimator (rule-based, 70+ models)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Modern UI (dark cyberpunk theme)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Session management (multi-turn conversations)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Django Admin (all 5 models registered)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> .env configuration (load_dotenv override)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> .gitignore + .env.example + README.md</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Mock fallback mode (works without API key)</div>
+            <div class="check-item"><span class="check-icon">&#10003;</span> Health check endpoint (/health/)</div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 13: Live Demo ==================== -->
+<div class="slide bg-green" data-slide="13">
+    <h2><span class="accent3">Live Demo</span></h2>
+    <p class="subtitle">Open <a href="http://localhost:8000" target="_blank" style="color:#00d4ff;text-decoration:underline;font-weight:700">localhost:8000</a></p>
+    <div class="grid-4" style="margin-top:30px">
+        <div class="card" style="text-align:center;border-color:#7b2ff733">
+            <div class="icon">&#128172;</div>
+            <h3>1. Chat</h3>
+            <p>"What's the best car for a family of 5 under 20K JOD?"</p>
+        </div>
+        <div class="card" style="text-align:center;border-color:#ffa50033">
+            <div class="icon">&#128176;</div>
+            <h3>2. Price Estimator</h3>
+            <p>Toyota &#8594; Camry &#8594; 2020 &#8594; 80,000 km</p>
+        </div>
+        <div class="card" style="text-align:center;border-color:#00d4ff33">
+            <div class="icon">&#128247;</div>
+            <h3>3. Vision</h3>
+            <p>Upload any car photo &#8594; instant AI identification</p>
+        </div>
+        <div class="card" style="text-align:center;border-color:#25d36633">
+            <div class="icon">&#128242;</div>
+            <h3>4. WhatsApp</h3>
+            <p>Click "Send via WhatsApp" &#8594; check your phone</p>
+        </div>
+    </div>
+    <p class="center" style="margin-top:30px;color:#555;font-size:.9em">All features are live and connected to real APIs</p>
+</div>
+
+<!-- ==================== SLIDE 14: Thank You ==================== -->
+<div class="slide bg-purple" data-slide="14">
+    <div class="center">
+        <p style="font-size:4em;margin-bottom:12px">&#128663;&#10024;</p>
+        <h1><span class="accent">Thank You!</span></h1>
+        <p class="subtitle" style="font-size:1.3em;margin-top:12px">IntelliWheels &mdash; AI Car Marketplace for Jordan</p>
+        <div style="margin-top:32px">
+            <span class="tag tag-purple">Gemini 2.5 Flash</span>
+            <span class="tag tag-cyan">Django REST</span>
+            <span class="tag tag-green">Twilio WhatsApp</span>
+            <span class="tag tag-orange">Crisp Pricing</span>
+            <span class="tag tag-red">Gemini Vision</span>
+        </div>
+        <div style="margin-top:40px">
+            <div style="display:inline-grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:30px;text-align:center">
+                <div class="stat"><div class="stat-num accent">7</div><div class="stat-label">API Endpoints</div></div>
+                <div class="stat"><div class="stat-num accent2">70+</div><div class="stat-label">Car Models</div></div>
+                <div class="stat"><div class="stat-num accent3">4</div><div class="stat-label">AI Features</div></div>
+                <div class="stat"><div class="stat-num accent4">5</div><div class="stat-label">DB Models</div></div>
+            </div>
+        </div>
+        <p style="margin-top:40px;color:#555;font-size:.9em">AI Engineer Course &mdash; Capstone Project &mdash; February 2026</p>
+        <p style="margin-top:10px;color:#444;font-size:1.1em">&#10067; Questions?</p>
+    </div>
+</div>
+
+<!-- Navigation Bar -->
+<div class="nav-bar">
+    <button onclick="prevSlide()">&#9664; Previous</button>
+    <span class="counter">Slide <span id="current">1</span> / <span id="total">14</span></span>
+    <button onclick="nextSlide()">Next &#9654;</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+const total = slides.length;
+document.getElementById('total').textContent = total;
+
+function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('current').textContent = current + 1;
+    document.getElementById('progressBar').style.width = ((current + 1) / total * 100) + '%';
+}
+function nextSlide() { showSlide(current + 1); }
+function prevSlide() { showSlide(current - 1); }
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    if (e.key === 'Home') showSlide(0);
+    if (e.key === 'End') showSlide(total - 1);
+});
+
+// Touch swipe support
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+});
+</script>
+</body>
+</html>

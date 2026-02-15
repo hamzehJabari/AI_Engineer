@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliWheels - AI Car Marketplace</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0f0f1a;color:#e0e0e0;min-height:100vh}
+        /* ======= NAV ======= */
+        nav{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:18px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #00d4ff33;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+        .logo{font-size:1.8em;font-weight:900;background:linear-gradient(90deg,#00d4ff,#7b2ff7,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .logo span{font-size:0.65em;font-weight:400;display:block;-webkit-text-fill-color:#aaa}
+        .nav-links a{color:#aaa;text-decoration:none;margin-left:28px;font-weight:600;transition:color .3s}
+        .nav-links a:hover,.nav-links a.active{color:#00d4ff}
+        /* ======= HERO ======= */
+        .hero{text-align:center;padding:70px 20px 40px;background:radial-gradient(ellipse at 50% 0%,#7b2ff722 0%,transparent 70%)}
+        .hero h1{font-size:3.2em;font-weight:900;margin-bottom:12px}
+        .hero h1 .accent{background:linear-gradient(90deg,#00d4ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero p{font-size:1.2em;color:#999;max-width:600px;margin:0 auto}
+        /* ======= TABS ======= */
+        .tabs{display:flex;justify-content:center;gap:12px;margin:36px 0 24px;flex-wrap:wrap}
+        .tab-btn{padding:12px 32px;border:2px solid #333;border-radius:50px;background:transparent;color:#999;font-size:1em;font-weight:600;cursor:pointer;transition:all .3s}
+        .tab-btn:hover{border-color:#7b2ff7;color:#fff}
+        .tab-btn.active{background:linear-gradient(135deg,#7b2ff7,#00d4ff);border-color:transparent;color:#fff;box-shadow:0 4px 20px #7b2ff744}
+        /* ======= PANELS ======= */
+        .panel{display:none;max-width:800px;margin:0 auto 50px;padding:0 20px}
+        .panel.active{display:block}
+        .card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid #ffffff11;border-radius:20px;padding:36px;box-shadow:0 8px 32px #00000066}
+        .card h2{font-size:1.6em;margin-bottom:20px;background:linear-gradient(90deg,#00d4ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        /* ======= CHAT ======= */
+        .chat-box{height:380px;overflow-y:auto;border:1px solid #ffffff11;border-radius:14px;padding:18px;margin-bottom:18px;background:#0d0d18;scrollbar-width:thin;scrollbar-color:#333 transparent}
+        .msg{margin-bottom:14px;padding:12px 18px;border-radius:18px;max-width:82%;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+        .msg.user{background:linear-gradient(135deg,#7b2ff7,#5a1fd6);margin-left:auto;border-bottom-right-radius:4px;color:#fff}
+        .msg.assistant{background:#1e1e38;border-bottom-left-radius:4px;color:#ccc}
+        .msg.assistant strong{color:#00d4ff}
+        .chat-input-row{display:flex;gap:10px}
+        .chat-input-row input{flex:1;padding:14px 20px;border:2px solid #333;border-radius:50px;background:#0d0d18;color:#fff;font-size:1em;outline:none;transition:border .3s}
+        .chat-input-row input:focus{border-color:#7b2ff7}
+        .chat-input-row button,.btn-primary{padding:14px 28px;border:none;border-radius:50px;background:linear-gradient(135deg,#7b2ff7,#00d4ff);color:#fff;font-weight:700;font-size:1em;cursor:pointer;transition:transform .2s,box-shadow .3s}
+        .chat-input-row button:hover,.btn-primary:hover{transform:scale(1.04);box-shadow:0 4px 20px #7b2ff766}
+        /* ======= PRICE ESTIMATOR ======= */
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+        .form-group{display:flex;flex-direction:column;gap:6px}
+        .form-group label{font-weight:600;color:#aaa;font-size:.9em}
+        .form-group select,.form-group input[type=number]{padding:12px 16px;border:2px solid #333;border-radius:12px;background:#0d0d18;color:#fff;font-size:1em;outline:none;transition:border .3s}
+        .form-group select:focus,.form-group input:focus{border-color:#00d4ff}
+        .result-box{display:none;margin-top:24px;padding:28px;border-radius:16px;background:linear-gradient(135deg,#0d2137,#0f1a2e);border:1px solid #00d4ff33}
+        .result-box h3{color:#00d4ff;margin-bottom:14px}
+        .result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ffffff08}
+        .result-row .label{color:#888}.result-row .value{font-weight:700;color:#fff}
+        .category-badge{display:inline-block;padding:4px 16px;border-radius:20px;font-weight:700;font-size:.85em;margin-left:8px}
+        .cat-luxury{background:#ff6b6b33;color:#ff6b6b}.cat-premium{background:#ffa50033;color:#ffa500}.cat-economic{background:#00d4ff33;color:#00d4ff}
+        /* ======= WHATSAPP BUTTON ======= */
+        .btn-whatsapp{padding:10px 22px;border:2px solid #25d366;border-radius:50px;background:transparent;color:#25d366;font-weight:700;font-size:.9em;cursor:pointer;transition:all .3s;margin-top:12px}
+        .btn-whatsapp:hover{background:#25d366;color:#fff;box-shadow:0 4px 16px #25d36644}
+        .wa-toast{position:fixed;bottom:30px;right:30px;background:#25d366;color:#fff;padding:14px 28px;border-radius:14px;font-weight:600;display:none;z-index:999;box-shadow:0 4px 20px #00000055}
+        /* ======= VISION ======= */
+        .upload-zone{border:3px dashed #333;border-radius:16px;padding:50px;text-align:center;cursor:pointer;transition:border-color .3s,background .3s;margin-bottom:20px}
+        .upload-zone:hover{border-color:#7b2ff7;background:#7b2ff708}
+        .upload-zone p{color:#888;font-size:1.1em}
+        .upload-zone .icon{font-size:3em;margin-bottom:12px}
+        #imagePreview{max-width:100%;max-height:300px;border-radius:12px;margin:16px auto;display:none}
+        .vision-result{display:none;margin-top:20px}
+        .vision-result .detail-card{background:#0d0d18;border:1px solid #ffffff11;border-radius:14px;padding:20px;margin-top:14px}
+        .vision-result .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #ffffff08}
+        .vision-result .detail-row:last-child{border-bottom:none}
+        /* ======= FEATURES ======= */
+        .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:900px;margin:30px auto 50px;padding:0 20px}
+        .feat-card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid #ffffff11;border-radius:16px;padding:28px;text-align:center;transition:transform .3s,border-color .3s}
+        .feat-card:hover{transform:translateY(-4px);border-color:#7b2ff755}
+        .feat-card .icon{font-size:2.5em;margin-bottom:12px}
+        .feat-card h3{color:#fff;margin-bottom:8px}
+        .feat-card p{color:#777;font-size:.9em;line-height:1.5}
+        /* ======= FOOTER ======= */
+        footer{text-align:center;padding:30px;color:#555;font-size:.9em;border-top:1px solid #ffffff08}
+        footer a{color:#7b2ff7;text-decoration:none}
+        /* ======= SPINNER ======= */
+        .spinner{display:inline-block;width:20px;height:20px;border:3px solid #ffffff33;border-top-color:#00d4ff;border-radius:50%;animation:spin .6s linear infinite;margin-right:8px;vertical-align:middle}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        /* ======= RESPONSIVE ======= */
+        @media(max-width:600px){
+            .hero h1{font-size:2em}
+            .form-grid{grid-template-columns:1fr}
+            nav{padding:14px 20px;flex-direction:column;gap:10px}
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">IntelliWheels<span>AI Car Marketplace</span></div>
+        <div class="nav-links">
+            <a href="#" class="active" onclick="switchTab('chat')">Chat</a>
+            <a href="#" onclick="switchTab('estimator')">Price Estimator</a>
+            <a href="#" onclick="switchTab('vision')">Vision Helper</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Find Your Perfect <span class="accent">Ride</span></h1>
+        <p>AI-powered chatbot, price estimator, and car image analyzer for the Jordanian market</p>
+    </section>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('chat')">&#128172; Chat</button>
+        <button class="tab-btn" onclick="switchTab('estimator')">&#128176; Price Estimator</button>
+        <button class="tab-btn" onclick="switchTab('vision')">&#128247; Vision Helper</button>
+    </div>
+
+    <!-- ============ CHAT PANEL ============ -->
+    <div id="panel-chat" class="panel active">
+        <div class="card">
+            <h2>&#128172; IntelliWheels Chat</h2>
+            <div class="chat-box" id="chatBox">
+                <div class="msg assistant">Welcome to <strong>IntelliWheels</strong>! &#128663;&#10024;
+I can help you with anything car-related in Jordan:
+&#8226; Car recommendations for your budget
+&#8226; Specs and comparisons
+&#8226; Market insights and tips
+&#8226; Maintenance advice
+
+What are you looking for?</div>
+            </div>
+            <div class="chat-input-row">
+                <input id="chatInput" type="text" placeholder="Ask about any car..." onkeydown="if(event.key==='Enter')sendChat()">
+                <button onclick="sendChat()">Send</button>
+            </div>
+            <button class="btn-whatsapp" id="chatWhatsApp" onclick="sendChatViaWhatsApp()" style="display:none">&#128242; Send Last Reply via WhatsApp</button>
+        </div>
+    </div>
+
+    <!-- ============ PRICE ESTIMATOR PANEL ============ -->
+    <div id="panel-estimator" class="panel">
+        <div class="card">
+            <h2>&#128176; Price Estimator</h2>
+            <p style="color:#888;margin-bottom:20px">Get an estimated market value using crisp depreciation logic for the Jordanian market.</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Make</label>
+                    <select id="estMake" onchange="loadModels()"><option value="">Select make...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Model</label>
+                    <select id="estModel"><option value="">Select model...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="number" id="estYear" min="1980" max="2026" value="2020">
+                </div>
+                <div class="form-group">
+                    <label>Mileage (km)</label>
+                    <input type="number" id="estMileage" min="0" value="50000">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="estimatePrice()" style="width:100%">&#128200; Estimate Price</button>
+            <div class="result-box" id="priceResult"></div>
+            <button class="btn-whatsapp" id="priceWhatsApp" onclick="sendPriceViaWhatsApp()" style="display:none">&#128242; Send Estimate via WhatsApp</button>
+        </div>
+    </div>
+
+    <!-- ============ VISION PANEL ============ -->
+    <div id="panel-vision" class="panel">
+        <div class="card">
+            <h2>&#128247; Vision Helper</h2>
+            <p style="color:#888;margin-bottom:20px">Upload a car photo and let AI identify make, model, year, and condition.</p>
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageFile').click()">
+                <div class="icon">&#128248;</div>
+                <p>Click or drag an image here</p>
+            </div>
+            <input type="file" id="imageFile" accept="image/*" style="display:none" onchange="previewImage(event)">
+            <img id="imagePreview" alt="preview">
+            <button class="btn-primary" onclick="analyzeImage()" style="width:100%;display:none" id="analyzeBtn">&#128270; Analyze Car</button>
+            <div class="vision-result" id="visionResult">
+                <h3 style="color:#00d4ff">&#9989; Analysis Result</h3>
+                <div class="detail-card" id="visionDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ FEATURES ============ -->
+    <div class="features-grid">
+        <div class="feat-card"><div class="icon">&#129302;</div><h3>AI Chatbot</h3><p>Powered by Google Gemini. Ask anything about cars in the Jordanian market.</p></div>
+        <div class="feat-card"><div class="icon">&#128202;</div><h3>Crisp Logic Pricing</h3><p>Rule-based depreciation engine with luxury, premium, and economic categories.</p></div>
+        <div class="feat-card"><div class="icon">&#128065;</div><h3>Computer Vision</h3><p>Upload a photo and get instant make, model, year, and condition analysis.</p></div>
+        <div class="feat-card"><div class="icon">&#128242;</div><h3>WhatsApp Share</h3><p>Send chat replies and price estimates directly to WhatsApp via Twilio.</p></div>
+    </div>
+
+    <!-- WhatsApp Toast -->
+    <div class="wa-toast" id="waToast"></div>
+
+    <footer>
+        <p>IntelliWheels &copy; 2026 &mdash; Built for the AI Engineer Course Capstone</p>
+        <p style="margin-top:8px"><a href="/health/">Health Check</a> &bull; <a href="/admin/">Admin</a></p>
+    </footer>
+
+    <script>
+    /* ====== TAB SWITCHING ====== */
+    let sessionId = null;
+    function switchTab(name){
+        document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+        document.getElementById('panel-'+name).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+        event.target.classList.add('active');
+        // highlight matching tab btn
+        document.querySelectorAll('.tab-btn').forEach(b=>{
+            if(b.textContent.toLowerCase().includes(name.substring(0,4))) b.classList.add('active');
+        });
+    }
+
+    /* ====== CHAT ====== */
+    function addMsg(text,role){
+        const box=document.getElementById('chatBox');
+        const d=document.createElement('div');
+        d.className='msg '+role;
+        d.innerHTML=text.replace(/\n/g,'<br>');
+        box.appendChild(d);
+        box.scrollTop=box.scrollHeight;
+    }
+    async function sendChat(){
+        const inp=document.getElementById('chatInput');
+        const msg=inp.value.trim();
+        if(!msg) return;
+        addMsg(msg,'user');
+        inp.value='';
+        const loading=document.createElement('div');
+        loading.className='msg assistant';
+        loading.innerHTML='<span class="spinner"></span> Thinking...';
+        document.getElementById('chatBox').appendChild(loading);
+        document.getElementById('chatBox').scrollTop=999999;
+        try{
+            const r=await fetch('/api/chat/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,session_id:sessionId})});
+            const d=await r.json();
+            loading.remove();
+            if(r.ok){sessionId=d.session_id;addMsg(d.message,'assistant');lastChatReply=d.message;document.getElementById('chatWhatsApp').style.display='block';}
+            else addMsg('Error: '+(d.error||'Unknown error'),'assistant');
+        }catch(e){loading.remove();addMsg('Connection error. Is the server running?','assistant');}
+    }
+
+    /* ====== PRICE ESTIMATOR ====== */
+    async function loadMakes(){
+        try{
+            const r=await fetch('/api/makes/');
+            const d=await r.json();
+            const sel=document.getElementById('estMake');
+            sel.innerHTML='<option value="">Select make...</option>';
+            d.makes.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m.charAt(0).toUpperCase()+m.slice(1);sel.appendChild(o);});
+        }catch(e){console.error(e);}
+    }
+    async function loadModels(){
+        const make=document.getElementById('estMake').value;
+        const sel=document.getElementById('estModel');
+        sel.innerHTML='<option value="">Select model...</option>';
+        if(!make) return;
+        try{
+            const r=await fetch('/api/models/'+make+'/');
+            const d=await r.json();
+            d.models.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m.charAt(0).toUpperCase()+m.slice(1);sel.appendChild(o);});
+        }catch(e){console.error(e);}
+    }
+    async function estimatePrice(){
+        const make=document.getElementById('estMake').value;
+        const model=document.getElementById('estModel').value;
+        const year=parseInt(document.getElementById('estYear').value);
+        const mileage=parseInt(document.getElementById('estMileage').value)||0;
+        if(!make||!model){alert('Please select make and model');return;}
+        const box=document.getElementById('priceResult');
+        box.style.display='block';
+        box.innerHTML='<span class="spinner"></span> Calculating...';
+        try{
+            const r=await fetch('/api/estimate/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({make,model,year,mileage_km:mileage})});
+            const d=await r.json();
+            if(!r.ok){box.innerHTML='<p style="color:#ff6b6b">Error: '+(d.error||JSON.stringify(d))+'</p>';return;}
+            const catClass='cat-'+d.category;
+            box.innerHTML=`
+                <h3>${d.make} ${d.model} (${d.year}) <span class="category-badge ${catClass}">${d.category.toUpperCase()}</span></h3>
+                <div class="result-row"><span class="label">Original Price (new)</span><span class="value">${Number(d.original_price_jod).toLocaleString()} JOD</span></div>
+                <div class="result-row"><span class="label">Estimated Value</span><span class="value" style="color:#00d4ff;font-size:1.3em">${Number(d.depreciated_price_jod).toLocaleString()} JOD</span></div>
+                <div class="result-row"><span class="label">Total Depreciation</span><span class="value" style="color:#ff6b6b">${d.depreciation_pct}%</span></div>
+                <div class="result-row"><span class="label">Car Age</span><span class="value">${d.breakdown.car_age_years} years</span></div>
+                <div class="result-row"><span class="label">Annual Depreciation Rate</span><span class="value">${d.breakdown.annual_depreciation_rate}</span></div>
+                <div class="result-row"><span class="label">Mileage Penalty</span><span class="value">${d.breakdown.mileage_penalty_pct}</span></div>
+            `;
+            lastPriceText=`IntelliWheels Price Estimate:\n${d.make} ${d.model} (${d.year})\nCategory: ${d.category}\nOriginal: ${Number(d.original_price_jod).toLocaleString()} JOD\nEstimated: ${Number(d.depreciated_price_jod).toLocaleString()} JOD\nDepreciation: ${d.depreciation_pct}%\nAge: ${d.breakdown.car_age_years} years\nMileage Penalty: ${d.breakdown.mileage_penalty_pct}`;
+            document.getElementById('priceWhatsApp').style.display='block';
+        }catch(e){box.innerHTML='<p style="color:#ff6b6b">Connection error</p>';}
+    }
+    loadMakes();
+
+    /* ====== VISION ====== */
+    let selectedFile=null;
+    function previewImage(e){
+        const file=e.target.files[0];
+        if(!file) return;
+        selectedFile=file;
+        const reader=new FileReader();
+        reader.onload=function(ev){
+            const img=document.getElementById('imagePreview');
+            img.src=ev.target.result;
+            img.style.display='block';
+            document.getElementById('analyzeBtn').style.display='block';
+            document.getElementById('visionResult').style.display='none';
+        };
+        reader.readAsDataURL(file);
+    }
+    // Drag & drop
+    const uz=document.getElementById('uploadZone');
+    uz.addEventListener('dragover',e=>{e.preventDefault();uz.style.borderColor='#7b2ff7';uz.style.background='#7b2ff711';});
+    uz.addEventListener('dragleave',e=>{uz.style.borderColor='#333';uz.style.background='transparent';});
+    uz.addEventListener('drop',e=>{e.preventDefault();uz.style.borderColor='#333';uz.style.background='transparent';const f=e.dataTransfer.files[0];if(f){document.getElementById('imageFile').files=e.dataTransfer.files;previewImage({target:{files:[f]}});}});
+
+    async function analyzeImage(){
+        if(!selectedFile){alert('Please upload an image first');return;}
+        const btn=document.getElementById('analyzeBtn');
+        btn.innerHTML='<span class="spinner"></span> Analyzing...';
+        btn.disabled=true;
+        const fd=new FormData();
+        fd.append('image',selectedFile);
+        try{
+            const r=await fetch('/api/vision/',{method:'POST',body:fd});
+            const d=await r.json();
+            btn.innerHTML='&#128270; Analyze Car';
+            btn.disabled=false;
+            if(!r.ok){alert('Error: '+(d.error||'Unknown'));return;}
+            const vr=document.getElementById('visionResult');
+            vr.style.display='block';
+            document.getElementById('visionDetails').innerHTML=`
+                <div class="detail-row"><span class="label">Make</span><span class="value">${d.make}</span></div>
+                <div class="detail-row"><span class="label">Model</span><span class="value">${d.model}</span></div>
+                <div class="detail-row"><span class="label">Year</span><span class="value">${d.year}</span></div>
+                <div class="detail-row"><span class="label">Condition</span><span class="value" style="color:#ccc">${d.condition}</span></div>
+            `;
+        }catch(e){btn.innerHTML='&#128270; Analyze Car';btn.disabled=false;alert('Connection error');}
+    }
+
+    /* ====== WHATSAPP ====== */
+    let lastChatReply = '';
+    let lastPriceText = '';
+
+    function showWaToast(msg, isError){
+        const t=document.getElementById('waToast');
+        t.textContent=msg;
+        t.style.background=isError?'#ff6b6b':'#25d366';
+        t.style.display='block';
+        setTimeout(()=>{t.style.display='none';},3000);
+    }
+
+    async function sendViaWhatsApp(text){
+        try{
+            const r=await fetch('/api/whatsapp/send/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
+            const d=await r.json();
+            if(r.ok) showWaToast('Sent via WhatsApp!',false);
+            else showWaToast('WhatsApp error: '+(d.error||'Unknown'),true);
+        }catch(e){showWaToast('Connection error',true);}
+    }
+
+    async function sendChatViaWhatsApp(){
+        if(!lastChatReply){alert('No chat reply to send yet.');return;}
+        await sendViaWhatsApp('IntelliWheels Chat:\n\n'+lastChatReply);
+    }
+
+    async function sendPriceViaWhatsApp(){
+        if(!lastPriceText){alert('No price estimate to send yet.');return;}
+        await sendViaWhatsApp(lastPriceText);
+    }
+    </script>
+</body>
+</html>

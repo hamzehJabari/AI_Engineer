@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers as drf_serializers
 
 from django.conf import settings
 from core.tools.whatsapp_twilio import send_whatsapp_message
@@ -19,6 +21,26 @@ class WhatsAppSendView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=['WhatsApp'],
+        summary='Send a WhatsApp message',
+        description='Send a message via Twilio WhatsApp. If no recipient is specified, uses the default from settings.',
+        request=inline_serializer(
+            name='WhatsAppSendRequest',
+            fields={
+                'message': drf_serializers.CharField(),
+                'to': drf_serializers.CharField(required=False),
+            }
+        ),
+        responses={200: inline_serializer(
+            name='WhatsAppSendResponse',
+            fields={
+                'status': drf_serializers.CharField(),
+                'sid': drf_serializers.CharField(),
+                'to': drf_serializers.CharField(),
+            }
+        )},
+    )
     def post(self, request):
         text = request.data.get("message", "").strip()
         to = request.data.get("to", "").strip()

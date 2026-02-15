@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers as drf_serializers
 
 from core.serializers.price_serializers import PriceEstimateInputSerializer
 from core.models.price_estimate import PriceEstimate
@@ -20,6 +22,26 @@ class PriceEstimateView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=['Price Estimator'],
+        summary='Estimate a car price',
+        description='Get a rule-based price estimate for a car in JOD, including depreciation and category classification.',
+        request=PriceEstimateInputSerializer,
+        responses={200: inline_serializer(
+            name='PriceEstimateResponse',
+            fields={
+                'make': drf_serializers.CharField(),
+                'model': drf_serializers.CharField(),
+                'year': drf_serializers.IntegerField(),
+                'mileage_km': drf_serializers.IntegerField(),
+                'category': drf_serializers.CharField(),
+                'original_price_jod': drf_serializers.FloatField(),
+                'depreciated_price_jod': drf_serializers.FloatField(),
+                'depreciation_pct': drf_serializers.FloatField(),
+                'breakdown': drf_serializers.DictField(),
+            }
+        )},
+    )
     def post(self, request):
         serializer = PriceEstimateInputSerializer(data=request.data)
         if not serializer.is_valid():
@@ -54,6 +76,15 @@ class CarMakesView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=['Price Estimator'],
+        summary='List all car makes',
+        description='Returns a list of all known car makes supported by the price estimator.',
+        responses={200: inline_serializer(
+            name='CarMakesResponse',
+            fields={'makes': drf_serializers.ListField(child=drf_serializers.CharField())}
+        )},
+    )
     def get(self, request):
         return Response({"makes": get_all_makes()})
 
@@ -63,6 +94,18 @@ class CarModelsView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=['Price Estimator'],
+        summary='List models for a car make',
+        description='Returns a list of all known models for a given car make.',
+        responses={200: inline_serializer(
+            name='CarModelsResponse',
+            fields={
+                'make': drf_serializers.CharField(),
+                'models': drf_serializers.ListField(child=drf_serializers.CharField()),
+            }
+        )},
+    )
     def get(self, request, make):
         models = get_models_for_make(make)
         return Response({"make": make, "models": models})

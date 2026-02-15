@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiRequest
+from rest_framework import serializers as drf_serializers
 
 from core.models.vision_analysis import VisionAnalysis
 from ai_engine.vision_helper import analyze_car_image
@@ -21,6 +23,25 @@ class VisionAnalyzeView(APIView):
     permission_classes = [AllowAny]
     parser_classes = [MultiPartParser, FormParser]
 
+    @extend_schema(
+        tags=['Vision'],
+        summary='Analyze a car image',
+        description='Upload a car photo (JPEG, PNG, WebP, GIF) and Gemini Vision will identify the make, model, year, and condition.',
+        request=inline_serializer(
+            name='VisionUploadRequest',
+            fields={'image': drf_serializers.ImageField()}
+        ),
+        responses={200: inline_serializer(
+            name='VisionAnalysisResponse',
+            fields={
+                'id': drf_serializers.IntegerField(),
+                'make': drf_serializers.CharField(),
+                'model': drf_serializers.CharField(),
+                'year': drf_serializers.CharField(),
+                'condition': drf_serializers.CharField(),
+            }
+        )},
+    )
     def post(self, request):
         image_file = request.FILES.get("image")
         if not image_file:

@@ -8,6 +8,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers as drf_serializers
 
 from core.models.chat import ChatSession, ChatMessage
 from core.serializers.chat_serializers import ChatInputSerializer
@@ -21,6 +23,21 @@ class ChatView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=['Chat'],
+        summary='Send a message to the AI chatbot',
+        description='Send a user message and receive an AI-generated response about cars and the Jordanian market.',
+        request=ChatInputSerializer,
+        responses={200: inline_serializer(
+            name='ChatResponse',
+            fields={
+                'message': drf_serializers.CharField(),
+                'session_id': drf_serializers.IntegerField(),
+                'model_used': drf_serializers.CharField(),
+                'response_time_ms': drf_serializers.IntegerField(),
+            }
+        )},
+    )
     def post(self, request):
         serializer = ChatInputSerializer(data=request.data)
         if not serializer.is_valid():

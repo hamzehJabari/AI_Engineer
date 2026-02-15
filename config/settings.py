@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'corsheaders',
     'core',
     'api',
@@ -90,6 +91,22 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'IntelliWheels API',
+    'DESCRIPTION': 'AI-powered car marketplace assistant for the Jordanian market. '
+                   'Features an AI chatbot (Google Gemini), rule-based price estimator, '
+                   'car image analyzer (Gemini Vision), and WhatsApp integration (Twilio).',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'TAGS': [
+        {'name': 'Chat', 'description': 'AI chatbot conversation'},
+        {'name': 'Price Estimator', 'description': 'Rule-based car price estimation in JOD'},
+        {'name': 'Vision', 'description': 'Car image analysis with Gemini Vision'},
+        {'name': 'WhatsApp', 'description': 'Send messages via Twilio WhatsApp'},
+    ],
 }
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG

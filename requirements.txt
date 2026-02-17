@@ -10,6 +10,9 @@ python-dotenv>=1.0.0
 # LLM & AI (Gemini - new SDK)
 google-genai>=1.0.0
 
+# CrewAI (Multi-Agent Orchestration)
+crewai>=1.0.0
+
 # Image Processing
 Pillow>=10.0.0
 

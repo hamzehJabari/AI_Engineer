@@ -1,0 +1,22 @@
+vision_analysis_task:
+  description: |
+    ### Input:
+    - **image_description:** {image_description}
+
+    Analyze the car image description and extract structured information about the vehicle.
+    Identify the manufacturer (make), specific model name, approximate year or year range,
+    and provide a 2-3 sentence condition assessment covering color, body style,
+    and any notable features or damage.
+
+    If you cannot confidently determine a field, use "Unknown" as the value.
+
+  expected_output: >
+    Return ONLY a JSON object in this exact format, WITHOUT returning ```json``` markers:
+    {
+      "make": "the car manufacturer",
+      "model": "the specific model name",
+      "year": "approximate year or year range",
+      "condition": "a brief 2-3 sentence description of the car's visible condition"
+    }
+
+  agent: vision_analyst

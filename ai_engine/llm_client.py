@@ -14,8 +14,14 @@ class GeminiClient:
 
     def __init__(self, model=None, vision_model=None):
         self.api_key = getattr(settings, 'GEMINI_API_KEY', '') or os.getenv('GEMINI_API_KEY', '')
-        self.model_name = model or getattr(settings, 'GEMINI_MODEL', 'gemini-2.0-flash')
-        self.vision_model_name = vision_model or getattr(settings, 'GEMINI_VISION_MODEL', 'gemini-2.0-flash')
+        # Model switch logic
+        model_switch = getattr(settings, 'GEMINI_MODEL_SWITCH', None) or os.getenv('GEMINI_MODEL_SWITCH', '2.0')
+        if model_switch == '2.5':
+            self.model_name = model or 'gemini-2.5-flash'
+            self.vision_model_name = vision_model or 'gemini-2.5-flash'
+        else:
+            self.model_name = model or 'gemini-2.0-flash'
+            self.vision_model_name = vision_model or 'gemini-2.0-flash'
         self._client = None
 
         if self.api_key:

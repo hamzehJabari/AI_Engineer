@@ -2,7 +2,7 @@
 
 ## AI-Powered Car Marketplace Assistant for Jordan
 
-`Gemini 2.5` · `Django REST` · `Twilio WhatsApp` · `Crisp Logic` · `Vision AI`
+`CrewAI Flows` · `Gemini 2.0` · `Django REST` · `Twilio WhatsApp` · `Multi-Agent Orchestration`
 
 > AI Engineer Course — Capstone Project — February 2026
 
@@ -27,9 +27,9 @@ Car buyers in Jordan face multiple challenges:
 
 | | Feature | Description |
 |---|---|---|
-| 🤖 | **AI Chatbot** | Google Gemini 2.5 Flash — Ask anything about cars: specs, comparisons, recommendations. Jordanian market focus with JOD pricing. |
+| 🤖 | **AI Chatbot** | CrewAI multi-agent system powered by Gemini 2.0 Flash — Car advisor agent handles specs, comparisons, recommendations with Jordanian market focus (JOD pricing). |
 | 📊 | **Price Estimator** | Crisp (rule-based) logic — 15 makes, 70+ models. Three depreciation tiers: Luxury (12%), Premium (10%), Economic (7%). |
-| 👁️ | **Vision Helper** | Gemini Vision API — Upload any car photo and instantly identify make, model, year, and visible condition. |
+| 👁️ | **Vision Helper** | CrewAI vision analyst agent + Gemini Vision API — Upload any car photo for instant AI identification of make, model, year, and condition. |
 | 📲 | **WhatsApp Share** | Twilio API — Send chat replies and price estimates directly to WhatsApp for on-the-go access. |
 
 ---
@@ -40,20 +40,24 @@ Car buyers in Jordan face multiple challenges:
 |---|---|
 | Language | Python 3.12 |
 | Backend | Django 4.2 + REST Framework |
-| LLM | Google Gemini 2.5 Flash |
-| LLM SDK | google-genai (new official SDK) |
-| Vision | Gemini Vision API |
+| Orchestration | **CrewAI Flows** (@start/@router/@listen) |
+| Agents | **2 CrewAI Agents** (Car Advisor + Vision Analyst) |
+| LLM | Google Gemini 2.0 Flash |
+| LLM SDK | google-genai (new official SDK) + CrewAI LLM wrapper |
+| Vision | CrewAI Vision Agent + Gemini Vision API |
 | Price Logic | Crisp / rule-based (custom) |
 | Messaging | Twilio WhatsApp Sandbox |
 | Database | SQLite 3 |
 | Frontend | HTML / CSS / JavaScript |
-| Config | python-dotenv (.env) |
+| Config | YAML (agents/tasks) + python-dotenv (.env) |
 
 ### Why These Choices?
 
+- **CrewAI Flows** — Advanced multi-agent orchestration with @start/@router/@listen decorators for intelligent request routing
 - **Django + DRF** — Battle-tested framework with admin, ORM, serializer validation
-- **Gemini 2.5 Flash** — Fast, multimodal, free tier suitable for development
+- **Gemini 2.0 Flash** — Fast, multimodal, production-ready with free tier
 - **google-genai SDK** — New official SDK replacing deprecated google-generativeai
+- **YAML Configuration** — Declarative agent/task configs following CrewAI best practices
 - **Crisp logic** — Deterministic pricing — no hallucinated numbers
 - **Twilio** — Industry-standard WhatsApp API with sandbox for prototyping
 
@@ -68,23 +72,32 @@ Car buyers in Jordan face multiple challenges:
                      ▼
 ┌─────────────────────────────────────────────────┐
 │    🚀 Django REST Framework — 7 API Endpoints   │
-└──┬──────────┬──────────┬──────────┬─────────────┘
-   ▼          ▼          ▼          ▼
-┌──────┐  ┌───────┐  ┌───────┐  ┌─────────┐
-│🤖 Car│  │📊Crisp│  │👁️Gemini│ │📲Twilio │
-│Chatbot│  │Logic  │  │Vision │  │WhatsApp │
-└──┬───┘  └───┬───┘  └───┬───┘  └────┬────┘
-   ▼          ▼          ▼           ▼
-┌─────────────────────┐  ┌───────────────────────┐
-│🗄️ SQLite — Records  │  │🧠 Gemini API (genai)  │
-└─────────────────────┘  └───────────────────────┘
+└────────────────────┬────────────────────────────┘
+                     ▼
+┌─────────────────────────────────────────────────┐
+│   🔀 CarMarketplaceFlow — @start/@router        │
+│        (Request Classification & Routing)       │
+└──┬──────────────────────────┬──────────────┬────┘
+   ▼                          ▼              ▼
+┌─────────┐            ┌──────────┐    ┌─────────┐
+│🤖 Chat  │            │👁️ Vision │    │📊 Crisp │
+│  Crew   │            │  Crew    │    │ Logic   │
+│(Advisor)│            │(Analyst) │    └────┬────┘
+└────┬────┘            └────┬─────┘         │
+     │                      │               │
+     └──────────┬───────────┘               │
+                ▼                           ▼
+      ┌──────────────────┐    ┌─────────────────────┐
+      │🧠 Gemini 2.0 API │    │🗄️ SQLite + WhatsApp │
+      └──────────────────┘    └─────────────────────┘
 ```
 
 ### Data Flows
 
-- **Chat:** User → ChatView → CarChatbotAgent → GeminiClient → Gemini API → ChatMessage → JSON
+- **Chat:** User → ChatView → CarMarketplaceFlow → @router("chat") → CarChatCrew → Gemini 2.0 → ChatMessage → JSON
 - **Price:** User → PriceEstimateView → `estimate_price()` crisp logic → PriceEstimate → JSON
-- **Vision:** Image → VisionView → `analyze_car_image()` → Gemini Vision → VisionAnalysis → JSON
+- **Vision:** Image → VisionView → CarMarketplaceFlow → @router("vision") → VisionAnalysisCrew → Gemini Vision → VisionAnalysis → JSON
+- **Combined:** User + Image → Flow → @router("chat_and_vision") → Both Crews (parallel) → Merged output → JSON
 - **WhatsApp:** Click share → WhatsAppView → `send_whatsapp_message()` → Twilio API → Delivered
 
 ---
@@ -118,8 +131,53 @@ Car buyers in Jordan face multiple challenges:
 { "message": "Best car under 15K JOD?" }
 
 // Response
-{ "message": "For 15,000 JOD...", "model_used": "gemini-2.5-flash" }
+{ "message": "For 15,000 JOD...", "model_used": "crewai-car-advisor" }
 ```
+
+---
+
+## CrewAI Flow Architecture
+
+### Multi-Agent Orchestration Pattern
+
+IntelliWheels uses **CrewAI Flows** to intelligently route requests to specialized AI agents:
+
+```python
+@start()
+def classify_request(self):
+    """Determine request type: chat, vision, or both"""
+    # Returns: "chat" | "vision" | "chat_and_vision"
+
+@router(classify_request)
+def route_to_crew(self):
+    """Route to appropriate crew based on classification"""
+    return self.state.request_type
+
+@listen("chat")
+def run_chat_crew(self):
+    """Execute CarChatCrew for text queries"""
+    CarChatCrew().crew().kickoff(inputs={...})
+
+@listen("vision")
+def run_vision_crew(self):
+    """Execute VisionAnalysisCrew for image analysis"""
+    VisionAnalysisCrew().crew().kickoff(inputs={...})
+```
+
+### Two Specialized Crews
+
+| | Crew | Agent | Config | Purpose |
+|---|---|---|---|---|
+| 🤖 | **CarChatCrew** | car_advisor | agents.yaml + tasks.yaml | Answers car questions, comparisons, recommendations for Jordanian market |
+| 👁️ | **VisionAnalysisCrew** | vision_analyst | agents.yaml + tasks.yaml | Identifies car from photos, extracts make/model/year/condition |
+
+### Why CrewAI Flows?
+
+- **Intelligent Routing** — @router automatically selects the right agent(s)
+- **Parallel Execution** — Can run both crews simultaneously for combined requests
+- **State Management** — CarMarketplaceState (Pydantic) tracks context across steps
+- **Declarative Config** — YAML-based agent/task definitions (no hardcoded prompts in code)
+- **Course Pattern** — Follows agents_htu best practices (@start/@listen/@router)
 
 ---
 
@@ -168,14 +226,24 @@ Value = Base Price × (1 − rate)^age − Mileage Penalty
 
 ---
 
-## LLM Integration & Agent
+## LLM Integration & Multi-Agent System
 
-### GeminiClient Architecture
+### Multi-Agent Architecture
 
+**CarMarketplaceFlow (Orchestration Layer)**
+| Decorator | Purpose |
+|---|---|
+| @start() | Classify request (chat/vision/both) based on inputs |
+| @router() | Route to appropriate crew(s) |
+| @listen("chat") | Execute CarChatCrew |
+| @listen("vision") | Execute VisionAnalysisCrew |
+| or_() | Merge results from parallel crew executions |
+
+**GeminiClient (LLM Layer)**
 | Property | Value |
 |---|---|
 | SDK | google-genai (new official SDK) |
-| Model | gemini-2.5-flash |
+| Model | gemini-2.0-flash |
 | Pattern | Singleton instance (one client, all requests) |
 | Methods | `chat()` + `analyze_image()` |
 
@@ -187,14 +255,23 @@ Value = Base Price × (1 − rate)^age − Mileage Penalty
 - **Mock mode** — Works without API key (returns setup instructions)
 - **Rate limit handling** — 429 errors → friendly message, no crashes
 
-### CarChatbotAgent — System Prompt Capabilities
+### CrewAI Agents — Capabilities
 
+**1. Car Advisor Agent (CarChatCrew)**
+- Configured via YAML (agents.yaml + tasks.yaml)
 - Car specs & comparisons
 - Budget recommendations (JOD)
 - Category explanations (Luxury/Premium/Economic)
 - Price guidance → redirect to estimator
 - Maintenance & import tips for Jordan
 - Politely redirects non-car questions
+
+**2. Vision Analyst Agent (VisionAnalysisCrew)**
+- Configured via YAML (agents.yaml + tasks.yaml)
+- Receives raw Gemini Vision output
+- Structures and validates JSON output
+- Extracts: make, model, year, color, condition, body style
+- Generates human-readable condition summary
 
 ### Session Management
 
@@ -207,20 +284,28 @@ Value = Base Price × (1 − rate)^age − Mileage Penalty
 
 ## Vision Analysis & WhatsApp
 
-### 👁️ Gemini Vision Helper
+### 👁️ CrewAI Vision Analysis Pipeline
 
 | Property | Value |
 |---|---|
 | Input | Car photo (JPEG/PNG/WebP) |
-| Output | Make, Model, Year, Condition |
-| Method | `Part.from_bytes()` → Gemini Vision |
-| Prompt | Structured JSON output format |
+| Step 1 | Gemini Vision API (`Part.from_bytes()`) |
+| Step 2 | VisionAnalysisCrew processes raw output |
+| Output | Structured JSON: Make, Model, Year, Color, Condition, Body Style |
+| Config | YAML-based agent (vision_analyst) |
 
-**Response Parsing:**
-- Parse JSON from Gemini response
-- Strip markdown code fences if present
-- Fallback: raw text → condition field
-- All results saved to VisionAnalysis model
+**Processing Pipeline:**
+1. Image uploaded → Gemini Vision generates raw description
+2. VisionAnalysisCrew agent receives raw description
+3. Agent extracts and structures: make, model, year, condition
+4. JSON parsing with fallback for malformed responses
+5. All results saved to VisionAnalysis model
+
+**Advantages of CrewAI Approach:**
+- Separation of concerns (vision → structured extraction)
+- Consistent JSON output via agent task configuration
+- Easy to iterate on extraction logic via YAML
+- Agent can handle ambiguous or partial vision outputs
 
 ### 📲 Twilio WhatsApp Integration
 
@@ -273,8 +358,9 @@ Value = Base Price × (1 − rate)^age − Mileage Penalty
 
 - ✅ Use case design (car marketplace for Jordan)
 - ✅ Django project + API endpoints (7 endpoints)
-- ✅ Core LLM logic (Gemini via google-genai SDK)
-- ✅ Agent capabilities (CarChatbotAgent)
+- ✅ Core LLM logic (Gemini 2.0 via google-genai SDK)
+- ✅ Multi-agent system (2 CrewAI agents + Flow orchestration)
+- ✅ Agent capabilities (Car Advisor + Vision Analyst)
 - ✅ WhatsApp connection (Twilio API)
 - ✅ Debugging & error handling (logging + fallbacks)
 - ✅ Performance & safety checks (validation + rate limits)
@@ -283,7 +369,10 @@ Value = Base Price × (1 − rate)^age − Mileage Penalty
 
 ### Bonus Features
 
-- ✅ Computer Vision (Gemini Vision API)
+- ✅ **CrewAI Flow orchestration** (@start/@router/@listen pattern)
+- ✅ **YAML-based agent configuration** (agents.yaml + tasks.yaml)
+- ✅ **Multi-agent collaboration** (chat + vision crews can run in parallel)
+- ✅ Computer Vision (CrewAI Vision Agent + Gemini Vision API)
 - ✅ Crisp logic estimator (rule-based, 70+ models)
 - ✅ Modern UI (dark cyberpunk theme)
 - ✅ Session management (multi-turn conversations)
@@ -312,11 +401,11 @@ Open **localhost:8000**
 
 ## 🚗✨ Thank You!
 
-**IntelliWheels — AI Car Marketplace for Jordan**
+**IntelliWheels — Multi-Agent AI Car Marketplace for Jordan**
 
-| 7 | 70+ | 4 | 5 |
-|---|---|---|---|
-| API Endpoints | Car Models | AI Features | DB Models |
+| 7 | 2 | 70+ | 4 | 5 |
+|---|---|---|---|---|
+| API Endpoints | CrewAI Agents | Car Models | AI Features | DB Models |
 
 > AI Engineer Course — Capstone Project — February 2026
 
